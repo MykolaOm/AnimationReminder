@@ -8,6 +8,7 @@
 
 import UIKit
 typealias tupleVar = (CGRect,CGRect,CGRect)
+
 class ViewController: UIViewController {
 
     private var leftLabel = UILabel()
@@ -46,7 +47,6 @@ class ViewController: UIViewController {
         return view
     }
     private func setButton(frame: CGRect, bgColor: UIColor, text : String) -> UIButton {
-
         let button = UIButton(frame: frame)
         button.setTitle(text, for: .normal)
         button.tintColor = .black
@@ -74,9 +74,9 @@ class ViewController: UIViewController {
         },
                        completion: nil )
     }
-    func onStartAnimation(view: UIView, distance: CGFloat, completion: ()) {
+    func onStartAnimation(view: UIView, distance: CGFloat, completion: (), option: UIView.AnimationOptions) {
         UIView.animate(withDuration: 2, delay: 0,
-                       options: [.curveEaseOut],
+                       options: [option],
                        animations: {
                         view.center.y += distance
         },
@@ -108,8 +108,8 @@ class ViewController: UIViewController {
         return (lLabel: lRect, rLabel: rRect, btn: bRect)
     }
     func runAnimationBlock() {
-        onStartAnimation(view: self.leftLabel, distance: CGFloat(self.distance)*multiplier, completion: backWardAnimation() )
-        onStartAnimation(view: self.rightLabel, distance: -1000*multiplier, completion: {}())
+        onStartAnimation(view: self.leftLabel, distance: CGFloat(self.distance)*multiplier, completion: backWardAnimation() ,option: UIView.AnimationOptions.curveEaseInOut)
+        onStartAnimation(view: self.rightLabel, distance: -1000*multiplier, completion: {}(), option: UIView.AnimationOptions.curveLinear)
     }
 }
 
