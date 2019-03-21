@@ -7,7 +7,6 @@
 //
 
 import UIKit
-typealias tupleVar = (CGRect,CGRect,CGRect)
 
 class ViewController: UIViewController {
 
@@ -18,42 +17,34 @@ class ViewController: UIViewController {
     private var centerR = CGPoint()
     private var centerB = CGPoint()
     private var readyToAnimate = true
-    private let distance = 500
-    lazy var screenWidth: CGFloat = { [unowned self] in
-        return self.view.frame.width
-    }()
-    private lazy var screenHeight = { [unowned self] in
-        return self.view.frame.height
-    }()
     private lazy var multiplier = {[unowned self] in
         // compare to Xr 896.0
         return (self.view.frame.height/896.0 )
     }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        let sizes = setSizes()
-        leftLabel = setLabel(frame: sizes.0, bgColor: .red, text: "Spring")
-        rightLabel = setLabel(frame: sizes.1, bgColor: .green, text: "Move")
-        startButton = setButton(frame: sizes.2, bgColor: UIColor.yellow , text: "Start")
+
+        leftLabel = setLabel(bgColor: .red, text: "Spring")
+        rightLabel = setLabel(bgColor: .green, text: "Move")
+        startButton = setButton(bgColor: UIColor.yellow , text: "Start")
+        runWithConstraints()
         updateSavedPositions()
     }
-    private func setLabel(frame: CGRect,bgColor: UIColor, text : String) -> UILabel {
-        let view = UILabel(frame: frame)
+
+    private func setLabel(bgColor: UIColor, text : String) -> UILabel {
+        let view = UILabel()
         view.text = text
         view.backgroundColor = bgColor
         view.textAlignment = .center
         self.view.addSubview(view)
         return view
     }
-    private func setButton(frame: CGRect, bgColor: UIColor, text : String) -> UIButton {
-        let button = UIButton(frame: frame)
+    private func setButton(bgColor: UIColor, text : String) -> UIButton {
+        let button = UIButton()
         button.setTitle(text, for: .normal)
         button.tintColor = .black
         button.setTitleColor(UIColor.black, for: .normal)
         button.backgroundColor = bgColor
-        button.center.x = self.view.center.x
-        button.center.y = screenHeight - 200*multiplier
         button.addTarget(self, action: #selector(animateTapped), for: .touchUpInside)
         self.view.addSubview(button)
         return button
@@ -67,49 +58,82 @@ class ViewController: UIViewController {
     }
     
    private func backWardAnimation() {
-        UIView.animate(withDuration: 4, delay: 0,
+        UIView.animate(withDuration: 2, delay: 0,
                        options: [.curveEaseOut],
                        animations: {
-                        self.leftLabel.center.y -= CGFloat(self.distance/2)
+                        self.animateConstraint(view: self.leftLabel, value: 150)
+                        self.view.layoutSubviews()
         },
                        completion: nil )
     }
-    func onStartAnimation(view: UIView, distance: CGFloat, completion: (), option: UIView.AnimationOptions) {
+    func onStartAnimation(view: UIView,completion: (), option: UIView.AnimationOptions) {
         UIView.animate(withDuration: 2, delay: 0,
                        options: [option],
                        animations: {
-                        view.center.y += distance
+                        self.animateConstraint(view: self.leftLabel, value: 300)
+                        self.animateConstraint(view: self.rightLabel, value: -100)
+                        self.view.layoutSubviews()
         },
                        completion: { (finish : Bool) in
                         completion }
         )
     }
     func stopAnimation() {
-        self.leftLabel.center = self.centerL
-        self.rightLabel.center = self.centerR
+        resetConstraints(view: leftLabel)
+        resetConstraints(view: rightLabel)
+        self.view.layoutSubviews()
     }
     func updateSavedPositions(){
         centerL = leftLabel.center
         centerR = rightLabel.center
         centerB = startButton.center
     }
-    func setSizes() -> tupleVar {
-        let leftX = screenWidth/4
-        let rightX = screenWidth * 3 / 4
-        let initialY = screenHeight / 6
-        let btnPoint = CGPoint(x: 0, y: 0)
-        let pointL = CGPoint(x: leftX-(50.0 * multiplier), y: initialY)
-        let pointR = CGPoint(x: rightX-(100.0 * multiplier), y: initialY)
-        let size = CGSize(width: 150*multiplier, height: 30*multiplier)
-        let bRect = CGRect(origin: btnPoint, size: size)
-        let lRect = CGRect(origin: pointL, size: size)
-        let rRect = CGRect(origin: pointR, size: size)
-        
-        return (lLabel: lRect, rLabel: rRect, btn: bRect)
-    }
+
     func runAnimationBlock() {
-        onStartAnimation(view: self.leftLabel, distance: CGFloat(self.distance)*multiplier, completion: backWardAnimation() ,option: UIView.AnimationOptions.curveEaseOut)
-        onStartAnimation(view: self.rightLabel, distance: -1000*multiplier, completion: {}(), option: UIView.AnimationOptions.curveLinear)
+        onStartAnimation(view: self.leftLabel, completion: backWardAnimation() ,option: UIView.AnimationOptions.curveEaseOut)
+        onStartAnimation(view: self.rightLabel, completion: {}(), option: UIView.AnimationOptions.curveLinear)
+    }
+    
+    func runWithConstraints(){
+        turnOffAutoresizingMask(to: [leftLabel,rightLabel,startButton])
+        setConstrainsToWidthAndHeight(views: [leftLabel,rightLabel,startButton])
+        setViewConstrain(view: leftLabel, isLeft: true, isLabel: true)
+        setViewConstrain(view: rightLabel, isLeft: false, isLabel: true)
+        setViewConstrain(view: startButton, isLeft: false, isLabel: false)
+    }
+    
+    func turnOffAutoresizingMask(to views: [UIView]) {
+        for view in views {
+            view.translatesAutoresizingMaskIntoConstraints = false
+        }
+    }
+    func setConstrainsToWidthAndHeight(views: [UIView]){
+        for view in views {
+            view.widthAnchor.constraint(equalToConstant: 150*self.multiplier).isActive = true
+            view.heightAnchor.constraint(equalToConstant: 30*self.multiplier).isActive = true
+        }
+    }
+    func setViewConstrain(view: UIView, isLeft : Bool, isLabel: Bool) {
+       let margins = self.view.layoutMarginsGuide
+        if isLabel {
+            view.topAnchor.constraint(equalTo: margins.topAnchor, constant: 20*self.multiplier).isActive = true
+            if isLeft {
+                view.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 30*self.multiplier).isActive = true
+            } else {
+                view.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: -30*self.multiplier).isActive = true
+            }
+        } else {
+            view.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -30*self.multiplier).isActive = true
+            view.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        }
+    }
+    func animateConstraint(view: UIView, value:CGFloat) {
+        let margins = self.view.layoutMarginsGuide
+         view.topAnchor.constraint(equalTo: margins.topAnchor, constant: 20 * self.multiplier + value).isActive = true
+    }
+    func resetConstraints(view : UIView){
+       let margins = self.view.layoutMarginsGuide
+       view.topAnchor.constraint(equalTo: margins.topAnchor, constant: 20 * self.multiplier).isActive = true
     }
 }
 
