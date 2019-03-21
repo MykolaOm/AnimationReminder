@@ -108,7 +108,7 @@ class ViewController: UIViewController {
         return (lLabel: lRect, rLabel: rRect, btn: bRect)
     }
     func runAnimationBlock() {
-        onStartAnimation(view: self.leftLabel, distance: CGFloat(self.distance)*multiplier, completion: backWardAnimation() ,option: UIView.AnimationOptions.curveEaseInOut)
+        onStartAnimation(view: self.leftLabel, distance: CGFloat(self.distance)*multiplier, completion: backWardAnimation() ,option: UIView.AnimationOptions.curveEaseOut)
         onStartAnimation(view: self.rightLabel, distance: -1000*multiplier, completion: {}(), option: UIView.AnimationOptions.curveLinear)
     }
 }
