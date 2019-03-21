@@ -60,17 +60,12 @@ class ViewController: UIViewController {
     }
     
     @objc private func animateTapped() {
-
-        if readyToAnimate {
-            onStartAnimation(view: self.leftLabel, distance: CGFloat(self.distance)*multiplier, completion: backWardAnimation() )
-            onStartAnimation(view: self.rightLabel, distance: -1000*multiplier, completion: {}())
-        } else {
-            stopAnimation()
-        }
+        _ = readyToAnimate ? runAnimationBlock() : stopAnimation()
         let txt = readyToAnimate ? "Reset": "Start"
         self.startButton.setTitle(txt, for: .normal)
         readyToAnimate = readyToAnimate ? false : true
     }
+    
    private func backWardAnimation() {
         UIView.animate(withDuration: 4, delay: 0,
                        options: [.curveEaseOut],
@@ -111,6 +106,10 @@ class ViewController: UIViewController {
         let rRect = CGRect(origin: pointR, size: size)
         
         return (lLabel: lRect, rLabel: rRect, btn: bRect)
+    }
+    func runAnimationBlock() {
+        onStartAnimation(view: self.leftLabel, distance: CGFloat(self.distance)*multiplier, completion: backWardAnimation() )
+        onStartAnimation(view: self.rightLabel, distance: -1000*multiplier, completion: {}())
     }
 }
 
