@@ -70,8 +70,8 @@ class ViewController: UIViewController {
         UIView.animate(withDuration: 2, delay: 0,
                        options: [option],
                        animations: {
-                        self.animateConstraint(view: self.leftLabel, value: 300)
-                        self.animateConstraint(view: self.rightLabel, value: -100)
+                        self.animateConstraint(view: self.leftLabel, value: 4.0)
+                        self.animateConstraint(view: self.rightLabel, value: -10.0)
                         self.view.layoutSubviews()
         },
                        completion: { (finish : Bool) in
@@ -90,7 +90,8 @@ class ViewController: UIViewController {
     }
 
     func runAnimationBlock() {
-        onStartAnimation(view: self.leftLabel, completion: backWardAnimation() ,option: UIView.AnimationOptions.curveEaseOut)
+//        onStartAnimation(view: self.leftLabel, completion: backWardAnimation() ,option: UIView.AnimationOptions.curveEaseOut)
+        onStartAnimation(view: self.leftLabel, completion: {}() ,option: UIView.AnimationOptions.curveEaseOut)
         onStartAnimation(view: self.rightLabel, completion: {}(), option: UIView.AnimationOptions.curveLinear)
     }
     
@@ -129,7 +130,9 @@ class ViewController: UIViewController {
     }
     func animateConstraint(view: UIView, value:CGFloat) {
         let margins = self.view.layoutMarginsGuide
-         view.topAnchor.constraint(equalTo: margins.topAnchor, constant: 20 * self.multiplier + value).isActive = true
+//        NSLayoutConstraint.deactivate([margins.topAnchor])
+//        NSLayoutConstraint.activate([margins.bottomAnchor])
+         view.topAnchor.constraint(equalTo: margins.topAnchor, constant: 20 * self.multiplier * value).isActive = true
     }
     func resetConstraints(view : UIView){
        let margins = self.view.layoutMarginsGuide
