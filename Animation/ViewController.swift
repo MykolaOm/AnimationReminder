@@ -14,7 +14,9 @@ class ViewController: UIViewController {
     private var startButton = UIButton()
     private var readyToAnimate = true
     private var leftLabelCenterYConstraint: NSLayoutConstraint!
+    private var leftLabelBottomConstraint: NSLayoutConstraint!
     private var rightLabelCenterYConstraint: NSLayoutConstraint!
+    private var startButtonBottomConstraint: NSLayoutConstraint!
     private lazy var multiplier = {[unowned self] in
         // compare to Xr 896.0
         return (self.view.frame.height/896.0 )
@@ -51,8 +53,10 @@ class ViewController: UIViewController {
         self.startButton.setTitle(txt, for: .normal)
         readyToAnimate = readyToAnimate ? false : true
     }
-   private func backWardAnimation() {
-        leftLabelCenterYConstraint.constant = self.view.center.y + self.view.center.y / 2
+   private func completionAnimation() {
+    print("backWardAnimation")
+    leftLabelCenterYConstraint.isActive = false
+    leftLabelBottomConstraint.isActive = true
         UIView.animate(withDuration: 2, delay: 0,
                        options: [.curveEaseOut],
                        animations: {
@@ -60,10 +64,23 @@ class ViewController: UIViewController {
         },
                        completion: nil )
     }
-    func onStartAnimation(view: UIView,completion: (), option: UIView.AnimationOptions) {
-        leftLabelCenterYConstraint.constant = self.view.center.y
+    private func rightAnimation() {
+        print("rightAnimation")
         rightLabelCenterYConstraint.constant = -self.view.center.y
-        UIView.animate(withDuration: 4, delay: 0,
+        UIView.animate(withDuration: 2, delay: 0,
+                       options: [.curveLinear],
+                       animations: {
+                        self.view.layoutIfNeeded()
+        },
+                       completion: { (finish: Bool) in
+        })
+    }
+    func onStartAnimation(view: UIView,completion: (), option: UIView.AnimationOptions) {
+        print("start")
+        leftLabelCenterYConstraint.isActive = true
+        leftLabelBottomConstraint.isActive = false
+        leftLabelCenterYConstraint.constant = self.view.bounds.maxY * 3/4
+        UIView.animate(withDuration: 2, delay: 2,
                        options: [option],
                        animations: {
                         self.view.layoutIfNeeded()
@@ -73,13 +90,12 @@ class ViewController: UIViewController {
         )
     }
     func stopAnimation() {
-        resetConstraints(view: leftLabel)
-        resetConstraints(view: rightLabel)
+        resetConstraints()
         self.view.layoutIfNeeded()
     }
     func runAnimationBlock() {
-        onStartAnimation(view: self.leftLabel, completion: backWardAnimation() ,option: UIView.AnimationOptions.curveEaseOut)
-        onStartAnimation(view: self.rightLabel, completion: {}(), option: UIView.AnimationOptions.curveLinear)
+        onStartAnimation(view: self.leftLabel, completion: completionAnimation() ,option: UIView.AnimationOptions.curveEaseOut)
+        rightAnimation()
     }
     func runWithConstraints(){
         turnOffAutoresizingMask(to: [leftLabel,rightLabel,startButton])
@@ -104,21 +120,27 @@ class ViewController: UIViewController {
         if isLabel {
             if isLeft {
                 view.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 30*self.multiplier).isActive = true
-                leftLabelCenterYConstraint = view.centerYAnchor.constraint(equalTo: self.view.topAnchor, constant: 80 * self.multiplier)
+                leftLabelCenterYConstraint = view.centerYAnchor.constraint(equalTo: self.view.topAnchor, constant: self.view.center.y)
                 leftLabelCenterYConstraint.isActive = true
+                leftLabelBottomConstraint = view.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -60*self.multiplier)
+                leftLabelBottomConstraint.isActive = false
             } else {
                 view.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: -30*self.multiplier).isActive = true
-                rightLabelCenterYConstraint = view.centerYAnchor.constraint(equalTo: self.view.topAnchor, constant: 80 * self.multiplier)
+                rightLabelCenterYConstraint = view.centerYAnchor.constraint(equalTo: self.view.topAnchor, constant: self.view.center.y)
                 rightLabelCenterYConstraint.isActive = true
             }
         } else {
-            view.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -30*self.multiplier).isActive = true
+            startButtonBottomConstraint = view.bottomAnchor.constraint(equalTo: margins.bottomAnchor, constant: -30*self.multiplier)
+            startButtonBottomConstraint.isActive = true
             view.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         }
     }
-    func resetConstraints(view : UIView){
-        leftLabelCenterYConstraint.constant = 80 * self.multiplier
-        rightLabelCenterYConstraint.constant = 80 * self.multiplier
+    func resetConstraints(){
+        self.leftLabelCenterYConstraint.isActive = true
+        self.leftLabelBottomConstraint.isActive = false
+        self.leftLabelCenterYConstraint.constant = self.view.center.y
+        self.rightLabelCenterYConstraint.constant = self.view.center.y
+
     }
 }
 
